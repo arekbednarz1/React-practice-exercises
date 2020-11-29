@@ -3,7 +3,26 @@ import axios from 'axios';
 
 const Search = () =>{
     const [term, setTerm] = useState('');
+    const [debouncedTerm, setDebouncedTerm] = useState(term);
     const [results, setResults]= useState([]);
+
+
+    useEffect(()=>{
+        const timerId = setTimeout(() =>{
+            setDebouncedTerm(term);
+        },1000);
+
+        return()=>{
+            clearTimeout(timerId);
+        };
+    }, [term]);
+
+    useEffect(() =>{
+
+
+    },[debouncedTerm]);
+
+
 
     useEffect(() => {
        const searchInWiki = async () =>{
@@ -16,11 +35,40 @@ const Search = () =>{
                    srsearch: term
                }
            });
+
+         setResults(data.query.search);
        };
 
-       searchInWiki();
+       if (term && results.length) {
+           searchInWiki();
+       } else {
+           const timeoutId = setTimeout(() => {
+               if (term) {
+                   searchInWiki();
+               }
+           }, 1000);
+
+           return () => {
+               clearTimeout(timeoutId);
+           };
+       };
     }, [term]);
 
+    const renderedRes= results.map((result) => {
+        return (
+        <div key={result.pageid} className="item">
+            <div className="right floated content">
+                <a className="ui button" href={`https://en.wikipedia.org?curid=${result.pageid}`}>GO</a>
+            </div>
+            <div className="content">
+                <div className="header">
+                    {result.title}
+                </div>
+                <span dangerouslySetInnerHTML={{ __html: result.snippet }}></span>
+            </div>
+        </div>
+    );
+    });
 
   return (
       <div>
@@ -30,6 +78,7 @@ const Search = () =>{
                   <input value={term} onChange={e => setTerm(e.target.value)} className="input"/>
       </div>
           </div>
+          <div className="ui celled list">{renderedRes}</div>
       </div>
   )
 };
