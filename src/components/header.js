@@ -2,7 +2,7 @@ import React from 'react';
 import Link from "./link";
 
 const Header = () => {
-    return(
+    return (
         <div className="ui secondary pointing menu">
             <Link href="/" className="item">
                 Accordion
